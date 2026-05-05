@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Student {
+  id             String       @id @default(uuid())
+  name           String
+  department     String
+  year           Int
+  mealCardNumber String       @unique
+  aauId          String       @unique
+  photoUrl       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  mealRecords    MealRecord[]
+}
+
+model MealRecord {
+  id         String   @id @default(uuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  mealType   MealType
+  recordDate DateTime @db.Date
+  createdAt  DateTime @default(now())
+
+  @@unique([studentId, mealType, recordDate])
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
