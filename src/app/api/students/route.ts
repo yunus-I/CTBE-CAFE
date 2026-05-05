@@ -1,11 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
+const MAX_PHOTO_SIZE_BYTES = 2 * 1024 * 1024;
 
 const studentSchema = z.object({
   name: z.string().trim().min(2),
@@ -49,6 +47,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.issues[0]?.message ?? "Invalid form data." }, { status: 400 });
     }
 
+    if (error instanceof Error && error.message.startsWith("Student photo")) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     if (isPrismaUniqueError(error)) {
       return NextResponse.json(
         { error: "Meal card number or AAU ID already exists." },
@@ -61,13 +63,19 @@ export async function POST(request: Request) {
 }
 
 async function savePhoto(file: File, cardNumber: string) {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Student photo must be an image.");
+  }
+
+  if (file.size > MAX_PHOTO_SIZE_BYTES) {
+    throw new Error("Student photo must be 2MB or smaller.");
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer());
-  const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-  const fileName = `${cardNumber.toLowerCase()}-${randomUUID()}.${extension}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, fileName), bytes);
-  return `/uploads/${fileName}`;
+  const mimeType = file.type || "image/jpeg";
+  const encoded = bytes.toString("base64");
+
+  return `data:${mimeType};base64,${encoded}`;
 }
 
 function isPrismaUniqueError(error: unknown) {
