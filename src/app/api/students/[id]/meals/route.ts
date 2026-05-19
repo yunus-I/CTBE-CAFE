@@ -15,24 +15,17 @@ export async function POST(
   try {
     const { id } = await context.params;
     const parsed = mealSchema.parse(await request.json());
+    const recordDate = createRecordDate();
 
     await prisma.mealRecord.create({
       data: {
         studentId: id,
         mealType: parsed.mealType,
-        recordDate: createRecordDate(),
+        recordDate,
       },
     });
 
-    const student = await prisma.student.findUnique({
-      where: { id },
-      include: {
-        mealRecords: {
-          where: { recordDate: createRecordDate() },
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    });
+    const student = await getStudentWithMealsToday(id, recordDate);
 
     if (!student) {
       return NextResponse.json({ error: "Student not found." }, { status: 404 });
@@ -59,6 +52,69 @@ export async function POST(
 
     return NextResponse.json({ error: "Could not record meal." }, { status: 500 });
   }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const parsed = mealSchema.parse(await request.json());
+    const recordDate = createRecordDate();
+
+    const existingRecord = await prisma.mealRecord.findFirst({
+      where: {
+        studentId: id,
+        mealType: parsed.mealType,
+        recordDate,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!existingRecord) {
+      return NextResponse.json(
+        { error: "No meal record found to undo for this student today." },
+        { status: 404 },
+      );
+    }
+
+    await prisma.mealRecord.delete({
+      where: { id: existingRecord.id },
+    });
+
+    const student = await getStudentWithMealsToday(id, recordDate);
+
+    if (!student) {
+      return NextResponse.json({ error: "Student not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: `${parsed.mealType.toLowerCase()} record was removed.`,
+      student: {
+        ...student,
+        mealsToday: student.mealRecords,
+      },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid meal type." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Could not undo meal record." }, { status: 500 });
+  }
+}
+
+async function getStudentWithMealsToday(id: string, recordDate: Date) {
+  return prisma.student.findUnique({
+    where: { id },
+    include: {
+      mealRecords: {
+        where: { recordDate },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
 }
 
 function isPrismaUniqueError(error: unknown) {

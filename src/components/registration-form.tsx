@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { departments } from "@/lib/constants";
 
 const emptyForm = {
   name: "",
@@ -72,13 +73,19 @@ export function RegistrationForm() {
         </Field>
 
         <Field label="Department">
-          <input
+          <select
             required
             value={form.department}
             onChange={(event) => updateField("department", event.target.value)}
             className="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-brand"
-            placeholder="Computer Science"
-          />
+          >
+            <option value="">Select department</option>
+            {departments.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
         </Field>
 
         <Field label="Year">

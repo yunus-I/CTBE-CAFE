@@ -1,5 +1,13 @@
 export const mealTypes = ["BREAKFAST", "LUNCH", "DINNER"] as const;
 
+export const departments = [
+  "Mechanical Engineering",
+  "Civil Engineering",
+  "Electrical Engineering",
+  "Software Engineering",
+  "Biomedical Engineering",
+] as const;
+
 export const mealTypeLabels: Record<(typeof mealTypes)[number], string> = {
   BREAKFAST: "Breakfast",
   LUNCH: "Lunch",

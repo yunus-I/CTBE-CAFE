@@ -81,6 +81,35 @@ export function TickingStation() {
     });
   }
 
+  async function undoMeal(mealType: string) {
+    if (!student) return;
+
+    setStatus(null);
+    setError(null);
+
+    startSaving(async () => {
+      const response = await fetch(`/api/students/${student.id}/meals`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mealType }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        message?: string;
+        student?: StudentResult;
+      };
+
+      if (!response.ok || !data.student) {
+        setError(data.error ?? "Could not undo meal record.");
+        return;
+      }
+
+      setStudent(data.student);
+      setStatus(data.message ?? `${formatMealLabel(mealType as never)} undone.`);
+    });
+  }
+
   useEffect(() => {
     const normalized = cardNumber.trim();
 
@@ -194,6 +223,24 @@ export function TickingStation() {
                 </div>
                 <span className="rounded-full bg-black/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
                   {mealsToday.has(activeMealType) ? "Done" : "Open"}
+                </span>
+              </div>
+            </button>
+            <button
+              type="button"
+              disabled={!student || !mealsToday.has(activeMealType) || isSaving}
+              onClick={() => void undoMeal(activeMealType)}
+              className="rounded-[24px] border border-rose-200 bg-rose-50 px-5 py-4 text-left text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-base font-semibold">Undo {formatMealLabel(activeMealType)}</p>
+                  <p className="mt-1 text-sm text-rose-600/80">
+                    Remove the active meal if it was marked by mistake.
+                  </p>
+                </div>
+                <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
+                  Undo
                 </span>
               </div>
             </button>

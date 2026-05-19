@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { departments } from "@/lib/constants";
 
 export const runtime = "nodejs";
 const MAX_PHOTO_SIZE_BYTES = 2 * 1024 * 1024;
 
 const studentSchema = z.object({
   name: z.string().trim().min(2),
-  department: z.string().trim().min(2),
+  department: z
+    .string()
+    .trim()
+    .refine((value) => departments.includes(value as (typeof departments)[number]), {
+      message: "Please select a valid department.",
+    }),
   year: z.coerce.number().int().min(1).max(8),
   mealCardNumber: z.string().trim().regex(/^\d{4}$/, "Meal card number must be exactly 4 digits."),
   aauId: z
