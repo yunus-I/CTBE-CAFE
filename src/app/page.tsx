@@ -1,12 +1,17 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
-import { mealTypeLabels } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { createRecordDate, formatDisplayDate, getMealStatusMessage } from "@/lib/utils";
+import { Locale, getTranslation, getTranslationOrSelf } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get("locale")?.value || "en") as Locale;
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(locale, key);
+
   const [studentCount, mealCountToday, recentStudents, recentMeals] =
     await Promise.all([
       prisma.student.count(),
@@ -28,21 +33,21 @@ export default async function HomePage() {
 
   return (
     <AppShell
-      title="Dashboard"
-      subtitle="A single workspace for registration, live meal verification, and attendance history across the CTBE cafe system."
+      title={t("dashboard")}
+      subtitle={t("dashboardSubtitle")}
       actions={
         <>
           <Link
             href="/register"
             className="rounded-2xl bg-brand px-5 py-3 font-semibold text-white transition hover:bg-brand-strong"
           >
-            Register student
+            {t("registerStudentBtn")}
           </Link>
           <Link
             href="/tick"
             className="rounded-2xl border border-border bg-white px-5 py-3 font-semibold transition hover:border-brand"
           >
-            Open ticking station
+            {t("openTickingStationBtn")}
           </Link>
         </>
       }
@@ -50,20 +55,20 @@ export default async function HomePage() {
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="grid gap-6">
           <div className="grid gap-4 md:grid-cols-3">
-            <StatCard label="Registered students" value={String(studentCount)} hint="Total profiles in the system" />
-            <StatCard label="Meals today" value={String(mealCountToday)} hint="Breakfast, lunch, and dinner combined" />
-            <StatCard label="Last sync" value={formatDisplayDate(new Date())} hint="Live from the database" />
+            <StatCard label={t("registeredStudents")} value={String(studentCount)} hint={t("totalProfiles")} />
+            <StatCard label={t("mealsToday")} value={String(mealCountToday)} hint={t("combinedMealsHint")} />
+            <StatCard label={t("lastSync")} value={formatDisplayDate(new Date())} hint={t("liveDbHint")} />
           </div>
 
           <div className="panel rounded-[28px] p-6">
-            <p className="text-lg font-semibold">Today&apos;s service windows</p>
-            <p className="mt-2 text-sm text-muted">{getMealStatusMessage()}</p>
+            <p className="text-lg font-semibold">{t("todaysServiceWindows")}</p>
+            <p className="mt-2 text-sm text-muted">{getMealStatusMessage(new Date(), locale)}</p>
             <div className="mt-4">
               <Link
                 href="/reports"
                 className="inline-flex rounded-2xl border border-border bg-white px-4 py-3 text-sm font-semibold transition hover:border-brand"
               >
-                Open daily reports
+                {t("openDailyReportsBtn")}
               </Link>
             </div>
           </div>
@@ -71,9 +76,9 @@ export default async function HomePage() {
           <div className="panel rounded-[28px] p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-lg font-semibold">Recent meal activity</p>
+                <p className="text-lg font-semibold">{t("recentMealActivity")}</p>
                 <p className="mt-1 text-sm text-muted">
-                  Latest records coming in from the ticking station.
+                  {t("tickingStationLiveHint")}
                 </p>
               </div>
             </div>
@@ -88,17 +93,17 @@ export default async function HomePage() {
                     <div>
                       <p className="font-semibold">{meal.student.name}</p>
                       <p className="text-sm text-muted">
-                        {meal.student.mealCardNumber} · {meal.student.department}
+                        {meal.student.mealCardNumber} · {getTranslationOrSelf(locale, meal.student.department)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{mealTypeLabels[meal.mealType]}</p>
+                      <p className="font-semibold">{getTranslation(locale, meal.mealType as never)}</p>
                       <p className="text-sm text-muted">{formatDisplayDate(meal.createdAt)}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <EmptyState message="No meal activity yet. Start with student registration or open the ticking station." />
+                <EmptyState message={t("noMealActivity")} />
               )}
             </div>
           </div>
@@ -106,7 +111,7 @@ export default async function HomePage() {
 
         <div className="grid gap-6">
           <div className="panel rounded-[28px] p-6">
-            <p className="text-lg font-semibold">Newly registered students</p>
+            <p className="text-lg font-semibold">{t("newlyRegisteredStudents")}</p>
             <div className="mt-5 grid gap-3">
               {recentStudents.length ? (
                 recentStudents.map((student) => (
@@ -117,7 +122,7 @@ export default async function HomePage() {
                   >
                     <p className="font-semibold">{student.name}</p>
                     <p className="mt-1 text-sm text-muted">
-                      {student.department} · Year {student.year}
+                      {getTranslationOrSelf(locale, student.department)} · {locale === "am" ? "ዓመት" : "Year"} {student.year}
                     </p>
                     <p className="mt-1 text-sm text-muted">
                       {student.mealCardNumber} · {student.aauId}
@@ -125,18 +130,18 @@ export default async function HomePage() {
                   </Link>
                 ))
               ) : (
-                <EmptyState message="No students have been registered yet." />
+                <EmptyState message={t("noStudentsRegisteredYet")} />
               )}
             </div>
           </div>
 
           <div className="rounded-[28px] bg-[linear-gradient(135deg,#a24c22,#df8c4b)] p-6 text-white shadow-[var(--shadow)]">
-            <p className="text-sm uppercase tracking-[0.24em] text-white/70">System target</p>
+            <p className="text-sm uppercase tracking-[0.24em] text-white/70">{t("systemTarget")}</p>
             <h3 className="mt-3 text-2xl font-semibold tracking-tight">
-              Fast check-in for thousands of students with strict duplicate prevention.
+              {t("systemTargetTitle")}
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/85">
-              Every meal entry is constrained by student, meal type, and date so one person cannot be counted twice for the same meal.
+              {t("systemTargetDesc")}
             </p>
           </div>
         </div>
@@ -170,3 +175,4 @@ function EmptyState({ message }: { message: string }) {
     </div>
   );
 }
+

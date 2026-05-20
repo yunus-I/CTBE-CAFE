@@ -1,13 +1,20 @@
+import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
 import { RegistrationForm } from "@/components/registration-form";
+import { Locale, getTranslation } from "@/lib/translations";
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get("locale")?.value || "en") as Locale;
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(locale, key);
+
   return (
     <AppShell
-      title="Student Registration"
-      subtitle="Create student profiles with card number, AAU ID, department, year, and photo so the cafe team can verify each meal visually."
+      title={t("studentRegistration")}
+      subtitle={t("registrationSubtitle")}
     >
       <RegistrationForm />
     </AppShell>
   );
 }
+

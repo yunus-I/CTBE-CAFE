@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
-import { mealTypeLabels, mealTypes } from "@/lib/constants";
+import { mealTypes } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { formatDisplayDate, parseDateInput } from "@/lib/utils";
+import { Locale, getTranslation } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,10 @@ export default async function ReportDetailPage({
 }: {
   params: Promise<{ date: string }>;
 }) {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get("locale")?.value || "en") as Locale;
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(locale, key);
+
   const { date } = await params;
   const recordDate = parseDateInput(date);
 
@@ -57,13 +63,13 @@ export default async function ReportDetailPage({
   return (
     <AppShell
       title={formatDisplayDate(recordDate)}
-      subtitle="Meal attendance summary for the selected date."
+      subtitle={t("mealAttendanceSummary")}
       actions={
         <Link
           href="/reports"
           className="rounded-2xl border border-border bg-white px-5 py-3 font-semibold transition hover:border-brand"
         >
-          Back to daily reports
+          {t("backToDailyReports")}
         </Link>
       }
     >
@@ -72,15 +78,15 @@ export default async function ReportDetailPage({
           {mealTypes.map((mealType) => (
             <SummaryCard
               key={mealType}
-              label={mealTypeLabels[mealType]}
+              label={getTranslation(locale, mealType)}
               value={counts[mealType]}
             />
           ))}
-          <SummaryCard label="Aggregated total" value={total} />
+          <SummaryCard label={t("aggregatedTotal")} value={total} />
         </div>
 
         <div className="panel rounded-[28px] p-6">
-          <p className="text-lg font-semibold">Meal records for the day</p>
+          <p className="text-lg font-semibold">{t("mealRecordsForDay")}</p>
           <div className="mt-5 grid gap-3">
             {records.map((record) => (
               <div
@@ -94,7 +100,7 @@ export default async function ReportDetailPage({
                   </p>
                 </div>
                 <div className="text-sm font-semibold text-brand">
-                  {mealTypeLabels[record.mealType]}
+                  {getTranslation(locale, record.mealType as never)}
                 </div>
               </div>
             ))}
@@ -113,3 +119,4 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
