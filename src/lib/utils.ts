@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { cafeTimeZone, mealTypeLabels, mealTypes, mealWindows } from "@/lib/constants";
+import { Locale, getTranslation, getTranslationOrSelf } from "@/lib/translations";
 
 type MealType = (typeof mealTypes)[number];
 
@@ -85,18 +86,26 @@ export function getCafeTimeLabel(value = new Date()) {
   }).format(value);
 }
 
-export function getMealStatusMessage(value = new Date()) {
+export function getMealStatusMessage(value = new Date(), locale: Locale = "en") {
   const activeWindow = getActiveMealWindow(value);
 
   if (activeWindow) {
-    return `${activeWindow.label} service is active now (${activeWindow.hours}).`;
+    const mealLabel = getTranslation(locale, activeWindow.mealType);
+    const activeMsg = getTranslation(locale, activeWindow.mealType === "BREAKFAST" ? "breakfastActiveMsg" : activeWindow.mealType === "LUNCH" ? "lunchActiveMsg" : "dinnerActiveMsg");
+    return `${activeMsg} (${activeWindow.hours}).`;
   }
 
-  return `No meal window is active at ${getCafeTimeLabel(value)}. Service windows are ${mealWindows
-    .map((window) => `${window.label}: ${window.hours}`)
-    .join(", ")}.`;
+  const noActiveMsg = getTranslation(locale, "noMealActiveMsg");
+  const serviceWindowsMsg = getTranslation(locale, "serviceWindowsAre");
+  
+  const formattedWindows = mealWindows
+    .map((w) => `${getTranslation(locale, w.mealType)}: ${w.hours}`)
+    .join(", ");
+
+  return `${noActiveMsg} ${getCafeTimeLabel(value)}. ${serviceWindowsMsg} ${formattedWindows}.`;
 }
 
-export function formatMealLabel(mealType: MealType) {
-  return mealTypeLabels[mealType];
+export function formatMealLabel(mealType: MealType, locale: Locale = "en") {
+  return getTranslation(locale, mealType);
 }
+

@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { departments } from "@/lib/constants";
+import { useTranslation } from "@/components/locale-context";
+import { getTranslationOrSelf } from "@/lib/translations";
 
 const emptyForm = {
   name: "",
@@ -13,6 +15,7 @@ const emptyForm = {
 };
 
 export function RegistrationForm() {
+  const { locale, t } = useTranslation();
   const [form, setForm] = useState(emptyForm);
   const [photo, setPhoto] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -47,11 +50,11 @@ export function RegistrationForm() {
       const data = (await response.json()) as { error?: string; message?: string };
 
       if (!response.ok) {
-        setError(data.error ?? "Registration failed.");
+        setError(getTranslationOrSelf(locale, data.error ?? "Registration failed."));
         return;
       }
 
-      setMessage(data.message ?? "Student registered.");
+      setMessage(getTranslationOrSelf(locale, data.message ?? "Student registered."));
       setForm(emptyForm);
       setPhoto(null);
       const fileInput = document.getElementById("photo") as HTMLInputElement | null;
@@ -62,33 +65,33 @@ export function RegistrationForm() {
   return (
     <form onSubmit={handleSubmit} className="panel rounded-[28px] p-6">
       <div className="grid gap-5 md:grid-cols-2">
-        <Field label="Student Name">
+        <Field label={t("studentName")}>
           <input
             required
             value={form.name}
             onChange={(event) => updateField("name", event.target.value)}
             className="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-brand"
-            placeholder="Abel Tesfaye"
+            placeholder={locale === "am" ? "አቤል ተስፋዬ" : "Abel Tesfaye"}
           />
         </Field>
 
-        <Field label="Department">
+        <Field label={t("department")}>
           <select
             required
             value={form.department}
             onChange={(event) => updateField("department", event.target.value)}
             className="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-brand"
           >
-            <option value="">Select department</option>
+            <option value="">{t("selectDepartment")}</option>
             {departments.map((department) => (
               <option key={department} value={department}>
-                {department}
+                {getTranslationOrSelf(locale, department)}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="Year">
+        <Field label={t("year")}>
           <input
             required
             type="number"
@@ -101,7 +104,7 @@ export function RegistrationForm() {
           />
         </Field>
 
-        <Field label="Meal Card Number">
+        <Field label={t("mealCardNumber")}>
           <input
             required
             value={form.mealCardNumber}
@@ -116,7 +119,7 @@ export function RegistrationForm() {
           />
         </Field>
 
-        <Field label="AAU ID">
+        <Field label={t("aauId")}>
           <div className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-2 rounded-2xl border border-border bg-white px-4 py-3 focus-within:border-brand">
             <span className="font-semibold text-muted">UGR-</span>
             <input
@@ -147,7 +150,7 @@ export function RegistrationForm() {
           </div>
         </Field>
 
-        <Field label="Student Photo">
+        <Field label={t("studentPhoto")}>
           <input
             id="photo"
             type="file"
@@ -168,7 +171,7 @@ export function RegistrationForm() {
           disabled={isPending}
           className="rounded-2xl bg-brand px-5 py-3 font-semibold text-white transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isPending ? "Saving student..." : "Register Student"}
+          {isPending ? t("savingStudent") : t("registerStudentSubmitBtn")}
         </button>
       </div>
     </form>
@@ -183,3 +186,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
+

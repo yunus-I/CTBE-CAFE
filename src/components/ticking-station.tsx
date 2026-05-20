@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { StudentAvatar } from "@/components/student-avatar";
 import { formatDisplayDate, formatMealLabel, getActiveMealType, getMealStatusMessage } from "@/lib/utils";
+import { useTranslation } from "@/components/locale-context";
+import { getTranslationOrSelf } from "@/lib/translations";
 
 type StudentResult = {
   id: string;
@@ -16,6 +18,7 @@ type StudentResult = {
 };
 
 export function TickingStation() {
+  const { locale, t } = useTranslation();
   const [cardNumber, setCardNumber] = useState("");
   const [student, setStudent] = useState<StudentResult | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -24,7 +27,7 @@ export function TickingStation() {
   const [isSaving, startSaving] = useTransition();
   const lastSearchedCard = useRef("");
   const activeMealType = getActiveMealType();
-  const mealStatusMessage = getMealStatusMessage();
+  const mealStatusMessage = getMealStatusMessage(new Date(), locale);
 
   const mealsToday = useMemo(
     () => new Set(student?.mealsToday.map((entry) => entry.mealType) ?? []),
@@ -43,12 +46,12 @@ export function TickingStation() {
 
       if (!response.ok || !data.student) {
         setStudent(null);
-        setError(data.error ?? "Student not found.");
+        setError(getTranslationOrSelf(locale, data.error ?? "Student not found."));
         return;
       }
 
       setStudent(data.student);
-      setStatus(`Student loaded for ${formatDisplayDate(new Date())}.`);
+      setStatus(`${t("studentLoadedFor")} ${formatDisplayDate(new Date())}.`);
     });
   }
 
@@ -72,12 +75,12 @@ export function TickingStation() {
       };
 
       if (!response.ok || !data.student) {
-        setError(data.error ?? "Could not record meal.");
+        setError(getTranslationOrSelf(locale, data.error ?? "Could not record meal."));
         return;
       }
 
       setStudent(data.student);
-      setStatus(data.message ?? `${formatMealLabel(mealType as never)} recorded.`);
+      setStatus(data.message ? getTranslationOrSelf(locale, data.message) : `${formatMealLabel(mealType as never, locale)} ${t("done")}.`);
     });
   }
 
@@ -101,12 +104,12 @@ export function TickingStation() {
       };
 
       if (!response.ok || !data.student) {
-        setError(data.error ?? "Could not undo meal record.");
+        setError(getTranslationOrSelf(locale, data.error ?? "Could not undo meal record."));
         return;
       }
 
       setStudent(data.student);
-      setStatus(data.message ?? `${formatMealLabel(mealType as never)} undone.`);
+      setStatus(data.message ? getTranslationOrSelf(locale, data.message) : `${formatMealLabel(mealType as never, locale)} ${t("undoMealLabel")}.`);
     });
   }
 
@@ -153,17 +156,17 @@ export function TickingStation() {
             }}
             inputMode="numeric"
             maxLength={4}
-            placeholder="Enter 4-digit card number"
+            placeholder={t("enter4DigitCard")}
             className="flex-1 rounded-2xl border border-border bg-white px-4 py-4 text-lg outline-none transition focus:border-brand"
           />
           <p className="text-sm text-muted">
-            The student loads automatically after 4 digits. Press Enter to record the active meal.
+            {t("loadAutoHelp")}
           </p>
         </div>
 
         <div className="mt-4 space-y-1 text-sm">
           <p className="text-muted">{mealStatusMessage}</p>
-          {isSearching ? <p className="text-muted">Searching student record...</p> : null}
+          {isSearching ? <p className="text-muted">{t("searchingStudentRecord")}</p> : null}
           {status ? <p className="text-success">{status}</p> : null}
           {error ? <p className="text-danger">{error}</p> : null}
         </div>
@@ -173,33 +176,33 @@ export function TickingStation() {
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
               <StudentAvatar name={student.name} photoUrl={student.photoUrl} />
               <div className="grid flex-1 gap-3 sm:grid-cols-2">
-                <Info label="Student Name" value={student.name} />
-                <Info label="Department" value={student.department} />
-                <Info label="Year" value={`Year ${student.year}`} />
-                <Info label="AAU ID" value={student.aauId} />
-                <Info label="Card Number" value={student.mealCardNumber} />
+                <Info label={t("studentName")} value={student.name} />
+                <Info label={t("department")} value={getTranslationOrSelf(locale, student.department)} />
+                <Info label={t("year")} value={locale === "am" ? `ዓመት ${student.year}` : `Year ${student.year}`} />
+                <Info label={t("aauId")} value={student.aauId} />
+                <Info label={t("cardNumberLabel")} value={student.mealCardNumber} />
                 <Info
-                  label="Meals Today"
+                  label={t("mealsTodayLabel")}
                   value={
                     student.mealsToday.length
                       ? student.mealsToday
-                          .map((entry) => formatMealLabel(entry.mealType as never))
+                          .map((entry) => formatMealLabel(entry.mealType as never, locale))
                           .join(", ")
-                      : "No meals recorded yet"
+                      : t("noMealsRecordedYet")
                   }
                 />
               </div>
             </div>
           ) : (
             <div className="py-12 text-center text-sm text-muted">
-              Enter a 4-digit card number to preview the student photo and today&apos;s meal status.
+              {t("scanCardPlaceholderHelp")}
             </div>
           )}
         </div>
       </section>
 
       <section className="panel rounded-[28px] p-6">
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand">Record meal</p>
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand">{t("recordMeal")}</p>
         {activeMealType ? (
           <div className="mt-4 grid gap-4">
             <button
@@ -214,15 +217,15 @@ export function TickingStation() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-lg font-semibold">{formatMealLabel(activeMealType)}</p>
+                  <p className="text-lg font-semibold">{formatMealLabel(activeMealType, locale)}</p>
                   <p className="mt-1 text-sm text-muted">
                     {mealsToday.has(activeMealType)
-                      ? "Already recorded for today."
-                      : "Press Enter or click this card to record the active meal."}
+                      ? t("alreadyRecordedToday")
+                      : t("recordActiveMealHint")}
                   </p>
                 </div>
                 <span className="rounded-full bg-black/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  {mealsToday.has(activeMealType) ? "Done" : "Open"}
+                  {mealsToday.has(activeMealType) ? t("done") : t("open")}
                 </span>
               </div>
             </button>
@@ -234,20 +237,22 @@ export function TickingStation() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-base font-semibold">Undo {formatMealLabel(activeMealType)}</p>
+                  <p className="text-base font-semibold">
+                    {locale === "am" ? `${formatMealLabel(activeMealType, locale)} ${t("undoMealLabel")}` : `Undo ${formatMealLabel(activeMealType, locale)}`}
+                  </p>
                   <p className="mt-1 text-sm text-rose-600/80">
-                    Remove the active meal if it was marked by mistake.
+                    {t("removeActiveMealHelp")}
                   </p>
                 </div>
                 <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  Undo
+                  {t("undoMealLabel")}
                 </span>
               </div>
             </button>
           </div>
         ) : (
           <div className="mt-4 rounded-[24px] border border-dashed border-border bg-white px-5 py-8 text-sm text-muted">
-            No meal button is available right now because the current time is outside breakfast, lunch, and dinner service windows.
+            {t("noActiveMealWindow")}
           </div>
         )}
       </section>
@@ -263,3 +268,4 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

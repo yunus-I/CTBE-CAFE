@@ -1,12 +1,18 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
-import { mealTypeLabels, mealTypes } from "@/lib/constants";
+import { mealTypes } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { formatDateInput, formatDisplayDate } from "@/lib/utils";
+import { Locale, getTranslation } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get("locale")?.value || "en") as Locale;
+  const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(locale, key);
+
   const groupedDates = await prisma.mealRecord.groupBy({
     by: ["recordDate"],
     _count: {
@@ -47,8 +53,8 @@ export default async function ReportsPage() {
 
   return (
     <AppShell
-      title="Daily Reports"
-      subtitle="Open a date to see breakfast, lunch, dinner, and total meal attendance for that specific day."
+      title={t("dailyReports")}
+      subtitle={t("reportsSubtitle")}
     >
       <section className="panel rounded-[28px] p-6">
         <div className="grid gap-4">
@@ -62,14 +68,14 @@ export default async function ReportsPage() {
                 <div>
                   <p className="text-lg font-semibold">{formatDisplayDate(entry.date)}</p>
                   <p className="mt-1 text-sm text-muted">
-                    Total meals recorded: {entry.total}
+                    {t("totalMealsRecordText")}: {entry.total}
                   </p>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-3 md:min-w-[420px]">
                   {mealTypes.map((mealType) => (
                     <div key={mealType} className="rounded-2xl bg-[var(--surface)] px-4 py-3">
                       <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                        {mealTypeLabels[mealType]}
+                        {getTranslation(locale, mealType)}
                       </p>
                       <p className="mt-1 text-lg font-semibold">{entry.counts[mealType]}</p>
                     </div>
@@ -79,7 +85,7 @@ export default async function ReportsPage() {
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-sm text-muted">
-              No dated meal reports are available yet. Start recording meals from the ticking station.
+              {t("noReportsAvailable")}
             </div>
           )}
         </div>
@@ -87,3 +93,4 @@ export default async function ReportsPage() {
     </AppShell>
   );
 }
+
