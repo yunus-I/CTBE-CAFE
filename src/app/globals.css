@@ -1,0 +1,573 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* AAU Portal Color System */
+  --background: #F4F4F4;
+  --surface: #FFFFFF;
+  --surface-strong: #FFFFFF;
+  --foreground: #212121;
+  --muted: #666666;
+  --border: #DDDDDD;
+
+  /* AAU Brand Blue (Primary) */
+  --brand: #3b7bbc;
+  --brand-strong: #2d6098;
+  --brand-soft: #e8f1fa;
+
+  /* Secondary (Slate / Charcoal accent) */
+  --secondary: #4a5568;
+  --secondary-strong: #2d3748;
+  --secondary-soft: #edf2f7;
+
+  /* Status */
+  --success: #2E7D32;
+  --warning: #F57C00;
+  --danger: #C62828;
+
+  /* Shadows */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.10);
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-secondary: var(--brand);
+  --color-secondary-strong: var(--brand-strong);
+  --color-secondary-soft: var(--brand-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-sans: 'Roboto', 'Open Sans', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--background);
+  font-size: 14px;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Roboto', 'Open Sans', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(139, 26, 26, 0.15);
+}
+
+/* ============================================
+   TYPOGRAPHY SCALE
+   ============================================ */
+.text-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.text-section-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.text-body {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--foreground);
+}
+
+.text-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+/* ============================================
+   CARD / PANEL COMPONENT
+   ============================================ */
+.card {
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+
+/* ============================================
+   BUTTON COMPONENTS
+   ============================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  background: var(--brand-strong);
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  background: var(--brand-soft);
+}
+.btn-secondary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-navy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+.btn-navy:hover {
+  background: var(--brand-soft);
+}
+
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+.btn-danger-outline:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+/* ============================================
+   INPUT / FORM FIELDS
+   ============================================ */
+.form-input {
+  width: 100%;
+  border: 1px solid #CCCCCC;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--foreground);
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.form-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(59, 123, 188, 0.12);
+}
+.form-input::placeholder {
+  color: #aaaaaa;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+/* ============================================
+   TABLE COMPONENT
+   ============================================ */
+.aau-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.aau-table thead tr {
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.aau-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.aau-table tbody tr:nth-child(odd) {
+  background: #FFFFFF;
+}
+
+.aau-table tbody tr:nth-child(even) {
+  background: #F9F9F9;
+}
+
+.aau-table tbody tr:hover {
+  background: var(--brand-soft);
+}
+
+.aau-table tbody td {
+  padding: 10px 14px;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+/* ============================================
+   BADGES / STATUS PILLS
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.badge-success {
+  background: #E8F5E9;
+  color: var(--success);
+}
+
+.badge-danger {
+  background: #FFEBEE;
+  color: var(--danger);
+}
+
+.badge-blue {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.badge-warning {
+  background: #FFF3E0;
+  color: var(--warning);
+}
+
+.badge-secondary {
+  background: #E3F0FF;
+  color: var(--brand);
+}
+
+.badge-muted {
+  background: #F5F5F5;
+  color: var(--muted);
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION
+   ============================================ */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  text-decoration: none;
+  user-select: none;
+}
+
+.sidebar-nav-item:hover {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.sidebar-nav-item.active {
+  border-left-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.sidebar-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--brand);
+  padding: 10px 16px 4px;
+  user-select: none;
+}
+
+/* ============================================
+   BREADCRUMB
+   ============================================ */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--brand);
+  text-decoration: none;
+}
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  color: #BBBBBB;
+}
+
+.breadcrumb-current {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ============================================
+   STAT CARD
+   ============================================ */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  min-width: 0;
+}
+
+.stat-card-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--brand);
+  line-height: 1.1;
+}
+
+.stat-card-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ============================================
+   APP SHELL LAYOUT
+   ============================================ */
+.app-shell {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+/* Blue accent line under navbar */
+.top-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: 60px;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 3px 0 0 var(--brand), 0 4px 6px rgba(0, 0, 0, 0.12);
+  border-bottom: 3px solid var(--brand);
+}
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  background: var(--background);
+}
+
+/* ============================================
+   MENU MANAGEMENT CARDS
+   ============================================ */
+.menu-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-card-img {
+  height: 140px;
+  background: #F0F0F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #BBBBBB;
+  font-size: 40px;
+}
+
+.menu-card-body {
+  padding: 14px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================
+   SCHEDULE CALENDAR GRID
+   ============================================ */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 100px repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.schedule-cell {
+  padding: 10px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-height: 70px;
+  font-size: 13px;
+}
+
+.schedule-cell-header {
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+  text-align: center;
+}
+
+.schedule-row-label {
+  background: #F9F9F9;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}

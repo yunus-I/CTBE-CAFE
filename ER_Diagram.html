@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTBE - Entity Relationship Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .diagram-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        .info h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .info h3 {
+            color: #555;
+            margin-top: 15px;
+        }
+        .info p, .info li {
+            color: #666;
+            line-height: 1.6;
+        }
+        .info ul {
+            margin-left: 20px;
+        }
+        .download-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>CTBE - Entity Relationship Diagram (ER Diagram)</h1>
+    <p style="color: #666; font-size: 14px;">Meal Management System Database Schema</p>
+    
+    <div class="diagram-container">
+        <div class="mermaid">
+erDiagram
+    STUDENT ||--o{ MEAL_RECORD : "has"
+    
+    STUDENT {
+        string id PK "UUID"
+        string name
+        string department
+        int year
+        string mealCardNumber UK "unique"
+        string aauId UK "unique"
+        string photoUrl "nullable"
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    MEAL_RECORD {
+        string id PK "UUID"
+        string studentId FK "references Student(id)"
+        string mealType "BREAKFAST, LUNCH, or DINNER"
+        date recordDate
+        datetime createdAt
+    }
+    
+    MEAL_TYPE {
+        string BREAKFAST
+        string LUNCH
+        string DINNER
+    }
+        </div>
+    </div>
+
+    <div class="info">
+        <h2>Database Schema Explanation</h2>
+        
+        <h3>📚 STUDENT Table</h3>
+        <p>Stores information about all students in the system.</p>
+        <ul>
+            <li><strong>id</strong>: Unique identifier (UUID) - Primary Key</li>
+            <li><strong>name</strong>: Student's full name</li>
+            <li><strong>department</strong>: Department the student belongs to</li>
+            <li><strong>year</strong>: Academic year (1, 2, 3, 4, etc.)</li>
+            <li><strong>mealCardNumber</strong>: Unique meal card number</li>
+            <li><strong>aauId</strong>: Unique AAU ID number</li>
+            <li><strong>photoUrl</strong>: Optional link to student photo</li>
+            <li><strong>createdAt</strong>: Record creation timestamp</li>
+            <li><strong>updatedAt</strong>: Last update timestamp</li>
+        </ul>
+
+        <h3>🍽️ MEAL_RECORD Table</h3>
+        <p>Records each meal consumed by a student, with a unique constraint preventing duplicate meal records for the same student on the same date for the same meal type.</p>
+        <ul>
+            <li><strong>id</strong>: Unique identifier (UUID) - Primary Key</li>
+            <li><strong>studentId</strong>: References the Student table - Foreign Key</li>
+            <li><strong>mealType</strong>: Type of meal (BREAKFAST, LUNCH, DINNER)</li>
+            <li><strong>recordDate</strong>: Date the meal was recorded</li>
+            <li><strong>createdAt</strong>: When the record was created</li>
+        </ul>
+
+        <h3>🔗 Relationship</h3>
+        <p><strong>One Student → Many Meal Records</strong> (One-to-Many)</p>
+        <p>Each student can have multiple meal records, but each meal record belongs to exactly one student.</p>
+
+        <h3>📝 Key Concepts</h3>
+        <ul>
+            <li><strong>PK</strong> = Primary Key (unique identifier for each row)</li>
+            <li><strong>FK</strong> = Foreign Key (links to another table)</li>
+            <li><strong>UK</strong> = Unique constraint (value must be unique)</li>
+            <li><strong>Unique Constraint on (studentId, mealType, recordDate)</strong> = A student cannot record the same meal type twice on the same date</li>
+        </ul>
+    </div>
+
+    <button class="download-btn" onclick="downloadDiagram()">📥 Download as PNG</button>
+
+    <script>
+        function downloadDiagram() {
+            // Get the SVG element from mermaid
+            const svg = document.querySelector('.mermaid svg');
+            if (!svg) {
+                alert('Diagram not ready yet. Please wait a moment and try again.');
+                return;
+            }
+            
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'ER_Diagram_CTBE.png';
+                link.click();
+            };
+            
+            img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+        }
+    </script>
+</body>
+</html>
